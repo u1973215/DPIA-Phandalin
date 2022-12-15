@@ -324,11 +324,12 @@ namespace StarterAssets
             }
             else
             {
-                Debug.Log(_verticalVelocity);
+                //Debug.Log(_verticalVelocity);
+                Debug.Log(_speed);
                 // reset the jump timeout timer
                 _jumpTimeoutDelta = JumpTimeout;
 
-                if (_verticalVelocity < 2.0f)
+                if (_verticalVelocity < 3.0f)
                 {
                     // update animator if using character
                     if (_hasAnimator)
