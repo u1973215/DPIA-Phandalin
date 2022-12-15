@@ -328,7 +328,7 @@ namespace StarterAssets
                 // reset the jump timeout timer
                 _jumpTimeoutDelta = JumpTimeout;
 
-                if (_verticalVelocity < 0.0f)
+                if (_verticalVelocity < 2.0f)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -360,7 +360,7 @@ namespace StarterAssets
         IEnumerator waiter()
         {
             //Wait for 4 seconds
-            yield return new WaitForSecondsRealtime(0.5f);
+            yield return new WaitForSecondsRealtime(0.4f);
             // the square root of H * -2 * G = how much velocity needed to reach desired height
             _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);            
         }
