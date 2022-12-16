@@ -47,6 +47,12 @@ namespace StarterAssets
         [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
         public float FallTimeout = 0.15f;
 
+        [Tooltip("Time required to pass before being able to attack again. Set to 0f to instantly attack again")]
+        public float AttackTimeout = 0.00f;
+
+        [Tooltip("Time required to pass before being able to dab again. Set to 0f to instantly dab again")]
+        public float DabTimeout = 1.00f;
+
         [Header("Player Grounded")]
         [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
         public bool Grounded = true;
@@ -91,6 +97,8 @@ namespace StarterAssets
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
+        private float _attackTimeoutDelta;
+        private float _dabTimeoutDelta;
 
         // animation IDs
         private int _animIDSpeed;
@@ -99,6 +107,9 @@ namespace StarterAssets
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
         private int _animIDPunching;
+        private int _animIDDabbing;
+
+        private bool isAttacking;
 
 
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
@@ -153,15 +164,24 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+            _attackTimeoutDelta = AttackTimeout;
+            _dabTimeoutDelta = DabTimeout;
+
+            isAttacking = false;
         }
 
         private void Update()
         {
             _hasAnimator = TryGetComponent(out _animator);
 
-            JumpAndGravity();
-            GroundedCheck();
-            Move();
+            Attack();
+            if (!isAttacking)
+            {
+                JumpAndGravity();
+                GroundedCheck();
+                Move();
+                Dab();
+            }
         }
 
         private void LateUpdate()
@@ -177,7 +197,7 @@ namespace StarterAssets
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
             _animIDPunching = Animator.StringToHash("Punching");
-
+            _animIDDabbing = Animator.StringToHash("Dabbing");
         }
 
         private void GroundedCheck()
@@ -305,6 +325,8 @@ namespace StarterAssets
                 
                 }
 
+                Debug.Log(_input.jump);
+
                 // Jump
                 if (_input.jump && _jumpTimeoutDelta <= 0.0f)
                 {
@@ -313,7 +335,7 @@ namespace StarterAssets
                     {
                         _animator.SetBool(_animIDJump, true);
                     }
-                    StartCoroutine(waiter());
+                    StartCoroutine(delayedJump());
                 }
 
                 // jump timeout
@@ -325,7 +347,7 @@ namespace StarterAssets
             else
             {
                 //Debug.Log(_verticalVelocity);
-                Debug.Log(_speed);
+                //Debug.Log(_speed);
                 // reset the jump timeout timer
                 _jumpTimeoutDelta = JumpTimeout;
 
@@ -358,7 +380,7 @@ namespace StarterAssets
             }
         }
 
-        IEnumerator waiter()
+        IEnumerator delayedJump()
         {
             //Wait for 4 seconds
             yield return new WaitForSecondsRealtime(0.4f);
@@ -370,6 +392,80 @@ namespace StarterAssets
             if (lfAngle < -360f) lfAngle += 360f;
             if (lfAngle > 360f) lfAngle -= 360f;
             return Mathf.Clamp(lfAngle, lfMin, lfMax);
+        }
+
+        private void Attack()
+        {
+            if (_hasAnimator)
+            {
+                _animator.SetBool(_animIDPunching, false);
+            }
+
+            // Attack
+            if (_input.attack && _attackTimeoutDelta <= 0.0f)
+            {
+                // update animator if using character
+                if (_hasAnimator)
+                {
+                    _animator.SetBool(_animIDPunching, true);
+                    _attackTimeoutDelta = AttackTimeout;
+                    _input.attack = false;
+                }
+            }
+
+            //Debug.Log(_animator.GetCurrentAnimatorClipInfo(0)[0].clip.name);
+            
+            // if we're inside Attack, don't move or jump
+            if (_animator.GetCurrentAnimatorClipInfo(0)[0].clip.name == "Punch")
+            {
+                isAttacking = true;
+            }
+            else
+            {
+                isAttacking = false;
+            }
+            
+            // attack timeout
+            if (_attackTimeoutDelta >= 0.0f)
+            {
+                _attackTimeoutDelta -= Time.deltaTime;
+            }
+        }
+
+        private void Dab()
+        {
+            if (_hasAnimator)
+            {
+                _animator.SetBool(_animIDDabbing, false);
+            }
+            /*
+            Debug.Log(_animator.GetCurrentAnimatorClipInfo(0)[0].clip.name);
+
+            // if we exited the animation, don't dab again
+            if (_animator.GetCurrentAnimatorClipInfo(0)[0].clip.name != "Dab")
+            {
+                _input.dab = false;
+            }*/
+
+            // Dab
+            if (_input.dab && _dabTimeoutDelta <= 0.0f)
+            {
+                // update animator if using character
+                if (_hasAnimator)
+                {
+                    
+                    //Debug.Log(_dabTimeoutDelta);
+                    _animator.SetBool(_animIDDabbing, true);
+                    _dabTimeoutDelta = DabTimeout;
+                    _input.dab = false; // this is easier
+                }
+            }
+
+            // dab timeout
+            if (_dabTimeoutDelta >= 0.0f)
+            {
+                _dabTimeoutDelta -= Time.deltaTime;
+            }
         }
 
         private void OnDrawGizmosSelected()

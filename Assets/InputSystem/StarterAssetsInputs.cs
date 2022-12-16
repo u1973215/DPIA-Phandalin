@@ -12,8 +12,10 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
+        public bool attack;
+        public bool dab;
 
-		[Header("Movement Settings")]
+        [Header("Movement Settings")]
 		public bool analogMovement;
 
 		[Header("Mouse Cursor Settings")]
@@ -43,10 +45,20 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
+
+        public void OnAttack(InputValue value)
+        {
+            AttackInput(value.isPressed);
+        }
+
+        public void OnDab(InputValue value)
+        {
+            DabInput(value.isPressed);
+        }
 #endif
 
 
-		public void MoveInput(Vector2 newMoveDirection)
+        public void MoveInput(Vector2 newMoveDirection)
 		{
 			move = newMoveDirection;
 		} 
@@ -61,13 +73,22 @@ namespace StarterAssets
 			jump = newJumpState;
 		}
 
-
 		public void SprintInput(bool newSprintState)
 		{
 			sprint = newSprintState;
 		}
 
-		private void OnApplicationFocus(bool hasFocus)
+        public void AttackInput(bool newAttackState)
+        {
+            attack = newAttackState;
+        }
+
+        public void DabInput(bool newDabState)
+        {
+            dab = newDabState;
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
 		{
 			SetCursorState(cursorLocked);
 		}

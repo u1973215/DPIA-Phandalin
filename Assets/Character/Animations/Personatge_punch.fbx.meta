@@ -36,11 +36,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: PunchStart
+      name: Punch
       takeName: root|rigAction
       internalID: -5729030048419175771
-      firstFrame: 0
-      lastFrame: 47
+      firstFrame: 7
+      lastFrame: 71
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
